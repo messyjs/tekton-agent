@@ -99,7 +99,7 @@ mkdir -p "$TEKTON_HOME"/{skills,extensions,sessions,checkpoints}
 SK_SESSION="checkpoint compress startup health"
 SK_ROUTING="sorting-hat update-models add-account"
 SK_PROJECT="project-registry project-status treasure-map dictionary find-skills"
-SK_ENGINES="engine-forge"
+SK_ENGINES="engine-forge subagent-forge provider-add"
 SK_CAVEMAN="caveman caveman-commit caveman-compress caveman-help caveman-review"
 SK_TRADING="hermes-trading markov-hedge-fund-method tv-fast-ops orca-cli"
 SK_POWER="orchestration skillception computer-use skeleton-key dreams hunger-games quantum-consciousness"

@@ -93,6 +93,16 @@ are detected and offered interactively — accept with `[Y]`, or pre-accept with
 10. **treasure-map** — spoken architecture → precise file/flow spec
 11. **find-skills** + **skillception** — self-extension (the self-improving part)
 12. **dictionary** — never guesses at your vague words
+13. **subagent-forge** — build sub-agents bound to engines (character-matched)
+14. **provider-add** — connect Ollama/OpenAI/Anthropic/OpenRouter/Groq/Gemini in minutes
+
+## Uninstall
+
+```bash
+./uninstall.sh            # removes components, KEEPS ~/.tekton data
+./uninstall.ps1 -Purge    # Windows: full removal (auto-backup first)
+```
+Removes skills, extensions, engine/subagent registries, npm components (cavemem, tekton link, pi). Your sessions/memory/projects stay unless `-Purge`/`--purge` (auto-backup first). OpenViking server data is never touched.
 
 ## Repo layout
 
