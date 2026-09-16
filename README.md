@@ -97,6 +97,7 @@ are detected and offered interactively — accept with `[Y]`, or pre-accept with
 12. **dictionary** — never guesses at your vague words
 13. **subagent-forge** — build sub-agents bound to engines (character-matched)
 14. **provider-add** — connect Ollama/OpenAI/Anthropic/OpenRouter/Groq/Gemini in minutes
+15. **os-control** — drive ANY software on ANY OS (CLI → MCP → GUI escalation)
 
 ## Uninstall
 
