@@ -23,6 +23,13 @@ PROVIDER_URL="${PROVIDER_URL:-http://localhost:11434}"
 
 cat "$REPO_DIR/assets/splash.txt" 2>/dev/null || true
 
+# ── 0b. self-download: fetch repo files if missing (curl|bash path) ─
+if [[ ! -d "$REPO_DIR/skills" || ! -f "$REPO_DIR/config/tekton.md" ]]; then
+  echo -e "${CYAN}▸ fetching Tekton repo files from GitHub${RST}"
+  mkdir -p "$HOME/.tekton-dl"
+  curl -fsSL "https://github.com/messyjs/tekton-agent/archive/refs/heads/main.tar.gz" -o "$HOME/.tekton-dl/repo.tar.gz"     && tar xzf "$HOME/.tekton-dl/repo.tar.gz" -C "$HOME/.tekton-dl"     && REPO_DIR="$HOME/.tekton-dl/tekton-agent-main"     || echo -e "${DIM}  self-download failed — run from a full repo clone instead${RST}"
+fi
+
 # ── 1a. preflight — detect everything, prompt for optionals ────────
 CORE_MISS=(); OPT_MISS=()
 command -v node >/dev/null 2>&1 && [[ $(node -v | cut -c2- | cut -d. -f1) -ge 20 ]] || CORE_MISS+=("node20+")
@@ -59,7 +66,7 @@ install_cloudflared() {
 need_node=1; command -v node >/dev/null 2>&1 && [[ $(node -v | cut -c2- | cut -d. -f1) -ge 20 ]] && need_node=0
 if [[ $need_node -eq 1 ]]; then
   echo -e "${CYAN}▸ installing Node.js 20+${RST}"
-  if [[ -n "${TERMUX_VERSION:-}" ]]; then pkg install -y nodejs-lts git
+  if [[ -n "${TERMUX_VERSION:-}" ]]; then pkg install -y nodejs-lts git python make clang binutils
   elif command -v brew >/dev/null 2>&1; then brew install node git
   elif command -v apt-get >/dev/null 2>&1; then (apt-get update -y && apt-get install -y curl git) ; curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash - ; sudo apt-get install -y nodejs
   elif command -v dnf >/dev/null 2>&1; then sudo dnf install -y nodejs git
