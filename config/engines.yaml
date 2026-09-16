@@ -4,6 +4,15 @@
 # Start with the listed start command, or register in ~/.tekton/config.yaml.
 
 engines:
+  tradingview:
+    package: "@phoenixaihub/tradingview-mcp"
+    start: "npx @phoenixaihub/tradingview-mcp   # or: node E:/AI Drive/tekton/tradingview-mcp-jackson/src/server.js"
+    transport: mcp-stdio
+    port: stdio
+    profile: optional
+    description: "TradingView control via MCP (chart ops, watchlists). Alternative impl: tradingview-mcp-jackson/src/server.js."
+    subagent_role: "Trading sub-agents drive chart operations through this MCP server; the gateway wraps stdio MCP as HTTP for remote phone access."
+
   engine-forge-bridge:
     package: "bountyfull-harness"
     start: "cd /d/AI Drive/projects/BountyFull && node electron/main.mjs   # harness :8720 + quant sidecar :8721"
