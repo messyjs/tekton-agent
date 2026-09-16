@@ -1,7 +1,7 @@
 <div align="center">
 
 ```text
-                  ⚔                       ╔══════════════════════════════╗
+                  ╷                       ╔══════════════════════════════╗  ⚔
                   █                       ║   T E K T O N                ║
                   █                       ║   The self-improving         ║
                  ╔╩╗                      ║   coding agent               ║
