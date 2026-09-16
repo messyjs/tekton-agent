@@ -110,6 +110,13 @@ projects:
   registry: %s/projects.json
 " "$PROJ_ROOT" "$TEKTON_HOME" >> "$TEKTON_HOME/config.yaml"
 echo -e "${DIM}  projects root recorded in config.yaml${RST}"
+mkdir -p "$TEKTON_HOME/sounds"
+cp "$REPO_DIR/assets/sounds/"*.wav "$TEKTON_HOME/sounds/" 2>/dev/null
+grep -q "^sound:" "$TEKTON_HOME/config.yaml" 2>/dev/null || printf "
+sound:
+  enabled: true
+  file: %s/sounds/beep-boop.wav
+" "$TEKTON_HOME" >> "$TEKTON_HOME/config.yaml"
 [[ -f "$TEKTON_HOME/settings.json" ]] || cp "$REPO_DIR/config/settings.example.json" "$TEKTON_HOME/settings.json"
 # reuse existing pi auth if present
 [[ -f "$HOME/.pi/agent/auth.json" && ! -f "$TEKTON_HOME/auth.json" ]] && cp "$HOME/.pi/agent/auth.json" "$TEKTON_HOME/auth.json" || true

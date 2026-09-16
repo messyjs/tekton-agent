@@ -74,6 +74,15 @@ async function render(t) {
   if (t === "health") return viewHealth(v);
   if (t === "settings") return viewSettings(v);
 }
+function speakText(t) {
+  if (!window.speechSynthesis) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(t);
+  const vName = localStorage.getItem("tekton_voice");
+  const v = speechSynthesis.getVoices().find(x => x.name === vName);
+  if (v) u.voice = v;
+  speechSynthesis.speak(u);
+}
 function viewChat(v) {
   v.innerHTML = `<div id="log" style="height:calc(100% - 120px);overflow:auto"></div>
     <div class="row"><input id="say" placeholder="Speak to Tekton..." />
@@ -83,7 +92,7 @@ function viewChat(v) {
   const log = $("#log");
   const push = (role, txt) => { const d = document.createElement("div");
     d.className = "msg " + (role === "user" ? "bubble-you" : "bubble-agent"); d.textContent = txt;
-    log.appendChild(d); log.scrollTop = log.scrollHeight; };
+    log.appendChild(d); log.scrollTop = log.scrollHeight; if (role === "assistant" && localStorage.getItem("tekton_speak") === "1") speakText(txt); };
   const send = async () => {
     const t = $("#say").value.trim(); if (!t) return; $("#say").value = "";
     push("user", t);
@@ -147,11 +156,25 @@ async function viewHealth(v) {
 }
 function viewSettings(v) {
   v.innerHTML = `
+    <div class="card"><b>Voice</b><small>choose the TTS voice for spoken replies (browser voices; the voice ENGINE adds neural TTS via --engines voice)</small>
+      <div class="row"><select id="voice-sel" style="flex:1"></select><button class="gold" id="voice-test">Test</button></div>
+      <div class="row"><label class="dim"><input type="checkbox" id="speak-on" /> speak assistant replies</label></div></div>
     <div class="card"><b>Gateway URL</b><small>tekton --gateway · or a cloudflared tunnel URL to chat remotely</small>
       <div class="row"><input id="gw-in" value="${esc(gw())}" /><button class="gold" id="gw-save">Save</button></div></div>
     <div class="card"><b>Tekton home</b><small id="thm">${esc(home || "…")}</small></div>
     <div class="card"><b>Chat from anywhere</b><small>1) tekton --gateway&nbsp;&nbsp;2) cloudflared tunnel --url http://localhost:8080&nbsp;&nbsp;3) set the tunnel URL above — phone browser or this app, anywhere.</small></div>`;
   $("#gw-save").onclick = () => { localStorage.setItem("tekton_gateway", $("#gw-in").value.trim()); render("settings"); };
+  const vs = $("#voice-sel");
+  const populateVoices = () => {
+    if (!window.speechSynthesis) { vs.innerHTML = "<option>no speech synthesis in this webview</option>"; return; }
+    vs.innerHTML = speechSynthesis.getVoices().map(v => `<option ${localStorage.getItem("tekton_voice") === v.name ? "selected" : ""}>${esc(v.name)}</option>`).join("");
+  };
+  populateVoices();
+  if (window.speechSynthesis) speechSynthesis.onvoiceschanged = () => { if ($("#voice-sel")) populateVoices(); };
+  $("#speak-on").checked = localStorage.getItem("tekton_speak") === "1";
+  $("#speak-on").onchange = e => localStorage.setItem("tekton_speak", e.target.checked ? "1" : "0");
+  vs.onchange = () => localStorage.setItem("tekton_voice", vs.value);
+  $("#voice-test").onclick = () => speakText("Tekton Agent OS voice ready. The blade is drawn.");
 }
 (async () => { try { home = await invoke("tekton_home_path"); } catch {} render("chat"); })();
 </script>

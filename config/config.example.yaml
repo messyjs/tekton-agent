@@ -37,3 +37,8 @@ openviking:
 projects:
   root: ~/AI-Projects
   registry: ~/.tekton/projects.json
+
+# End-of-message sound (assets/sounds has beep-boop variants; set enabled: false for silence)
+sound:
+  enabled: true
+  file: ~/.tekton/sounds/beep-boop.wav
