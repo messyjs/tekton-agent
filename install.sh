@@ -33,7 +33,7 @@ command -v npm  >/dev/null 2>&1 || CORE_MISS+=("npm")
 echo -e "${BOLD}▸ preflight${RST}"
 for m in "${CORE_MISS[@]:-}"; do  [[ -n "$m" ]] && echo -e "  ${GOLD}● missing (required)  $m  → auto-install${RST}"; done
 for m in "${OPT_MISS[@]:-}"; do   [[ -n "$m" ]] && echo -e "  ${DIM}○ missing (optional)  $m${RST}"; done
-if [[ ${#OPT_MISS[@]:-0} -gt 0 ]]; then
+if [[ ${#OPT_MISS[@]} -gt 0 ]]; then
   if [[ $ASSUME_YES -eq 1 ]]; then OPT_INSTALL=1; echo -e "${DIM}  --yes: installing optional packages automatically${RST}"
   elif [[ -t 0 ]]; then
     read -r -p "  Install the missing optional packages now? [Y/n] " ans
@@ -117,15 +117,14 @@ fi
 # ── 3. ~/.tekton home ───────────────────────────────────────────────
 echo -e "${CYAN}▸ wiring $TEKTON_HOME (context home, tekton.md)${RST}"
 mkdir -p "$TEKTON_HOME"/{skills,extensions,sessions,checkpoints}
-[[ -f "$TEKTON_HOME/tekton.md" ]] || sed "s/{{USER_NAME}}/${TEKTON_USER:-Knight}/g; s/{{USER_STYLE}}/direct, hands-on builder/g" "$REPO_DIR/config/tekton.md" > "$TEKTON_HOME/tekton.md"
+[[ -f "$TEKTON_HOME/tekton.md" ]] || sed "s/{{USER_NAME}}/${TEKTON_USER:-Knight}/g; s/{{USER_STYLE}}/direct, hands-on builder/g; s|{{PROJECTS_DIR}}|$PROJ_ROOT|g" "$REPO_DIR/config/tekton.md" > "$TEKTON_HOME/tekton.md"
 [[ -f "$TEKTON_HOME/config.yaml" ]] || sed "s/{{MODEL_FAST}}/$MODEL/g; s/{{MODEL_DEEP}}/$MODEL/g; s|{{PROVIDER_URL}}|$PROVIDER_URL|g; s|{{PROJECTS_DIR}}|$PROJ_ROOT|g" "$REPO_DIR/config/config.example.yaml" > "$TEKTON_HOME/config.yaml"
 [[ -f "$TEKTON_HOME/models.json" ]] || cp "$REPO_DIR/config/models.example.json" "$TEKTON_HOME/models.json"
-grep -q "^projects:" "$TEKTON_HOME/config.yaml" 2>/dev/null || printf "
+grep -q "^projects:" "$TEKTON_HOME/config.yaml" 2>/dev/null || { printf "
 projects:
   root: %s
   registry: %s/projects.json
-" "$PROJ_ROOT" "$TEKTON_HOME" >> "$TEKTON_HOME/config.yaml"
-echo -e "${DIM}  projects root recorded in config.yaml${RST}"
+" "$PROJ_ROOT" "$TEKTON_HOME" >> "$TEKTON_HOME/config.yaml"; echo -e "${DIM}  projects root recorded in config.yaml${RST}"; }
 mkdir -p "$TEKTON_HOME/sounds"
 cp "$REPO_DIR/assets/sounds/"*.wav "$TEKTON_HOME/sounds/" 2>/dev/null
 grep -q "^sound:" "$TEKTON_HOME/config.yaml" 2>/dev/null || printf "

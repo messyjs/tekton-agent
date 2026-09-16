@@ -33,11 +33,6 @@ openviking:
   # server: http://localhost:1933
   # api_key: {{OV_API_KEY}}
 
-# Where Tekton creates new project folders (installer asks; -ProjectsDir/--projects-dir override)
-projects:
-  root: ~/AI-Projects
-  registry: ~/.tekton/projects.json
-
 # End-of-message sound (assets/sounds has beep-boop variants; set enabled: false for silence)
 sound:
   enabled: true
