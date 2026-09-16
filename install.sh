@@ -4,13 +4,13 @@
 #                      [--model NAME] [--provider URL] [--ov-server URL] [--user NAME]
 set -euo pipefail
 
-PROFILE="recommended"; OS_APP=0; MOBILE=0; OV_SERVER=""; MODEL=""; PROVIDER_URL=""; TEKTON_USER=""; SKIP_RUNTIME=0; ENGINES=""; ALL_ENGINES=0; ASSUME_YES=0; OPT_INSTALL=0; TOOLCHAINS=""
+PROFILE="recommended"; OS_APP=0; MOBILE=0; OV_SERVER=""; MODEL=""; PROVIDER_URL=""; TEKTON_USER=""; SKIP_RUNTIME=0; ENGINES=""; ALL_ENGINES=0; ASSUME_YES=0; OPT_INSTALL=0; TOOLCHAINS=""; PROJECTS_DIR=""; PROJ_ROOT=""
 while [[ $# -gt 0 ]]; do case "$1" in
   --minimal) PROFILE="minimal";; --recommended) PROFILE="recommended";; --full) PROFILE="full";;
   --os-app) OS_APP=1;; --mobile-chat) MOBILE=1;; --ov-server) OV_SERVER="$2"; shift;;
   --model) MODEL="$2"; shift;; --provider) PROVIDER_URL="$2"; shift;;
   --user) TEKTON_USER="$2"; shift;; --skip-runtime) SKIP_RUNTIME=1;;
-  --engines) ENGINES="$2"; shift;; --all-engines) ALL_ENGINES=1;; --yes) ASSUME_YES=1;; --toolchains) TOOLCHAINS="$2"; shift;;
+  --engines) ENGINES="$2"; shift;; --all-engines) ALL_ENGINES=1;; --yes) ASSUME_YES=1;; --toolchains) TOOLCHAINS="$2"; shift;; --projects-dir) PROJECTS_DIR="$2"; shift;;
   -h|--help) sed -n '2,5p' "$0"; exit 0;; *) echo "unknown flag: $1"; exit 1;; esac; shift; done
 
 BOLD="\033[1m"; CYAN="\033[36m"; GOLD="\033[33m"; DIM="\033[2m"; RST="\033[0m"
@@ -85,12 +85,31 @@ else
   echo -e "${DIM}▸ tekton CLI already installed: $(command -v tekton)${RST}"
 fi
 
+# ── 2b. project files location ─────────────────────────────────────
+DEFAULT_PROJ="${PROJECTS_DIR:-$HOME/AI-Projects}"
+if [[ -n "$PROJECTS_DIR" ]]; then PROJ_ROOT="$PROJECTS_DIR"
+elif [[ -t 0 ]]; then
+  read -r -p "Where should Tekton store project files? [$DEFAULT_PROJ] " ans
+  PROJ_ROOT="${ans:-$DEFAULT_PROJ}"
+else
+  PROJ_ROOT="$DEFAULT_PROJ"
+  echo -e "${DIM}  (non-interactive: projects root = $PROJ_ROOT — use --projects-dir to choose)${RST}"
+fi
+mkdir -p "$PROJ_ROOT"
+echo -e "${CYAN}▸ project files: $PROJ_ROOT${RST}"
+
 # ── 3. ~/.tekton home ───────────────────────────────────────────────
 echo -e "${CYAN}▸ wiring $TEKTON_HOME (context home, tekton.md)${RST}"
 mkdir -p "$TEKTON_HOME"/{skills,extensions,sessions,checkpoints}
 [[ -f "$TEKTON_HOME/tekton.md" ]] || sed "s/{{USER_NAME}}/${TEKTON_USER:-Knight}/g; s/{{USER_STYLE}}/direct, hands-on builder/g" "$REPO_DIR/config/tekton.md" > "$TEKTON_HOME/tekton.md"
-[[ -f "$TEKTON_HOME/config.yaml" ]] || sed "s/{{MODEL_FAST}}/$MODEL/g; s/{{MODEL_DEEP}}/$MODEL/g; s|{{PROVIDER_URL}}|$PROVIDER_URL|g" "$REPO_DIR/config/config.example.yaml" > "$TEKTON_HOME/config.yaml"
+[[ -f "$TEKTON_HOME/config.yaml" ]] || sed "s/{{MODEL_FAST}}/$MODEL/g; s/{{MODEL_DEEP}}/$MODEL/g; s|{{PROVIDER_URL}}|$PROVIDER_URL|g; s|{{PROJECTS_DIR}}|$PROJ_ROOT|g" "$REPO_DIR/config/config.example.yaml" > "$TEKTON_HOME/config.yaml"
 [[ -f "$TEKTON_HOME/models.json" ]] || cp "$REPO_DIR/config/models.example.json" "$TEKTON_HOME/models.json"
+grep -q "^projects:" "$TEKTON_HOME/config.yaml" 2>/dev/null || printf "
+projects:
+  root: %s
+  registry: %s/projects.json
+" "$PROJ_ROOT" "$TEKTON_HOME" >> "$TEKTON_HOME/config.yaml"
+echo -e "${DIM}  projects root recorded in config.yaml${RST}"
 [[ -f "$TEKTON_HOME/settings.json" ]] || cp "$REPO_DIR/config/settings.example.json" "$TEKTON_HOME/settings.json"
 # reuse existing pi auth if present
 [[ -f "$HOME/.pi/agent/auth.json" && ! -f "$TEKTON_HOME/auth.json" ]] && cp "$HOME/.pi/agent/auth.json" "$TEKTON_HOME/auth.json" || true

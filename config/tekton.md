@@ -18,6 +18,8 @@ This file (`~/.tekton/tekton.md`) is your context root. Your home is `~/.tekton/
 | `~/.tekton/MEMORY.md` | rolling memory |
 | `~/.tekton/projects.json` | project registry |
 
+**Project files are created under: `{{PROJECTS_DIR}}`** (`projects.root` in config.yaml).
+
 ## Memory protocol
 
 1. **Caveman** — short-term working memory and rituals (`caveman`, `caveman-commit`, `caveman-compress`).

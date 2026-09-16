@@ -98,6 +98,10 @@ are detected and offered interactively — accept with `[Y]`, or pre-accept with
 
 ## Uninstall
 
+During install you're asked **where to store project files** (default `~/AI-Projects`, or anything like `D:\AI Drive\projects` — answer to put AI projects on a separate drive). It's recorded as `projects.root` in `~/.tekton/config.yaml` and injected into `tekton.md`; the registry stays at `~/.tekton/projects.json`. Override with `--projects-dir` / `-ProjectsDir`.
+
+## Uninstall
+
 ```bash
 ./uninstall.sh            # removes components, KEEPS ~/.tekton data
 ./uninstall.ps1 -Purge    # Windows: full removal (auto-backup first)
