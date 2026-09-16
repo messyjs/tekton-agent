@@ -20,7 +20,7 @@ Get-Content "$Repo\assets\splash.txt" -ErrorAction SilentlyContinue
 $CoreMiss = @(); $OptMiss = @()
 try { $v = (node -v); if ([int]($v.Substring(1).Split(".")[0]) -lt 20) { $CoreMiss += "node20+" } } catch { $CoreMiss += "node20+" }
 if (-not (Get-Command git -ErrorAction SilentlyContinue))  { $CoreMiss += "git" }
-if ($OsApp -and -not (Get-Command cargo -ErrorAction SilentlyContinue))     { $OptMiss += "rust/cargo   (builds the Agent OS App)" }
+if ($OsApp -and -not (Get-Command cargo -ErrorAction SilentlyContinue))     { $OptMiss += "rust/cargo   [recommended - builds the Agent OS App]" }
 if ($MobileChat -and -not (Get-Command cloudflared -ErrorAction SilentlyContinue)) { $OptMiss += "cloudflared  (remote mobile chat tunnel)" }
 Write-Host "▸ preflight" -ForegroundColor Cyan
 foreach ($m in $CoreMiss) { Write-Host "  ● missing (required)  $m  → auto-install" -ForegroundColor Yellow }
@@ -127,6 +127,24 @@ if ($AllEngines -or $Engines) {
   Write-Host "  sub-agents (orchestration skill) call engines via gateway/MCP adapters." -ForegroundColor DarkGray
 }
 
+# ── 5c. app toolchains (-Toolchains "web,windows,macos,linux,android,ios,vst,games") ──
+if ($Toolchains) {
+  Write-Host "▸ toolchains: $Toolchains" -ForegroundColor Cyan
+  foreach ($t in $Toolchains.Split(",")) {
+    switch ($t.Trim()) {
+      "web"      { Write-Host "  web/html: node (installed with core) - nothing extra" }
+      "windows"  { Write-Host "  windows apps: + MSVC Build Tools (winget install Microsoft.VisualStudio.2022.BuildTools --override '--add Microsoft.VisualStudio.Workload.VCTools --passive') + WebView2" }
+      "macos"    { Write-Host "  macos apps: run 'xcode-select --install' (Xcode CLT) if not present" }
+      "linux"    { Write-Host "  linux apps: + build-essential libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev libssl-dev patchelf (apt)" }
+      "android"  { Write-Host "  android apps: + rustup android targets + Android Studio (SDK+NDK), set ANDROID_HOME + NDK_HOME - then 'tauri android build'" }
+      "ios"      { Write-Host "  ios apps: needs full Xcode from the App Store (macOS only) - then 'tauri ios init'" }
+      "vst"      { Write-Host "  vst/audio plugins: C++ toolchain + CMake + JUCE - Windows: MSVC Build Tools; mac: xcode-select --install; linux: build-essential cmake" }
+      "games"    { Write-Host "  games: Unity Hub / Unreal / Godot per engine; html5 games need only node" }
+      default    { Write-Host "  unknown toolchain: $t" }
+    }
+  }
+}
+
 # ── 6. add-ons ──────────────────────────────────────────────────────
 if ($MobileChat) {
   Write-Host "▸ mobile remote chat:" -ForegroundColor Yellow
@@ -151,7 +169,8 @@ if ($OsApp) {
     winget install -e --id Rustlang.Rustup --accept-source-agreements --accept-package-agreements
     $env:Path = [Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [Environment]::GetEnvironmentVariable("Path","User")
     Push-Location "$Repopp"
-    try { npm install; npx tauri build; Write-Host "  built → app\src-tauri	argeteleaseundle\" -ForegroundColor Yellow } catch { Write-Host "  build failed — see docs\AGENT-OS.md" -ForegroundColor DarkGray }
+    try { npm install; npx tauri build; Write-Host "  built → app\src-tauri	arget
+eleaseundle\" -ForegroundColor Yellow } catch { Write-Host "  build failed — see docs\AGENT-OS.md" -ForegroundColor DarkGray }
     Pop-Location
   } else { Write-Host "  Rust not found. Re-run with -Yes to auto-install, or: https://rustup.rs" -ForegroundColor DarkGray }
 }

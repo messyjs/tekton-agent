@@ -41,6 +41,8 @@ and remembers everything via **Caveman** memory and **OpenViking** long-term rec
 
 ## Install
 
+**Rust is recommended** (builds the Agent OS App); per-target toolchains for VST plugins, games, web, Windows/macOS/iOS/Android/Linux builds: see [`docs/TOOLCHAINS.md`](docs/TOOLCHAINS.md) and the `--toolchains` installer flag.
+
 **Missing prerequisites are handled automatically.** The installer runs a preflight:
 required tools (Node 20+, git, npm) are auto-installed via winget/brew/apt/dnf/pkg;
 optional add-on dependencies (Rust for `--os-app`, `cloudflared` for `--mobile-chat`)
