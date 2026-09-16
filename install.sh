@@ -85,6 +85,7 @@ fi
 if ! command -v tekton >/dev/null 2>&1; then
   echo -e "${CYAN}▸ building Tekton CLI from messyjs/tekton${RST}"
   mkdir -p "$HOME/.tekton-src"
+  [[ -n "${TERMUX_VERSION:-}" ]] && pkg install -y python make clang binutils 2>/dev/null
   [[ -d "$HOME/.tekton-src/tekton" ]] || git clone https://github.com/messyjs/tekton "$HOME/.tekton-src/tekton"
   ( cd "$HOME/.tekton-src/tekton" && npm install && npm run build -w @tekton/cli && npm link ) \
     || { echo -e "${DIM}  build failed — ask for repo access or npm publish @tekton/cli${RST}"; }
@@ -107,7 +108,7 @@ echo -e "${CYAN}▸ project files: $PROJ_ROOT${RST}"
 
 # ── 2c. launch command name (default: tekton) ──────────────────────
 if [[ -n "$CMD_NAME" ]]; then RUN_CMD="$CMD_NAME"
-elif [[ -t 0 ]]; then
+elif [[ -t 0 && $ASSUME_YES -eq 0 ]]; then
   read -r -p "Launch command name? [tekton] " ans
   RUN_CMD="${ans:-tekton}"
 fi
