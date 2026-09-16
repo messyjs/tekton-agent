@@ -41,6 +41,12 @@ and remembers everything via **Caveman** memory and **OpenViking** long-term rec
 
 ## Install
 
+**Missing prerequisites are handled automatically.** The installer runs a preflight:
+required tools (Node 20+, git, npm) are auto-installed via winget/brew/apt/dnf/pkg;
+optional add-on dependencies (Rust for `--os-app`, `cloudflared` for `--mobile-chat`)
+are detected and offered interactively — accept with `[Y]`, or pre-accept with `--yes` /
+`-Yes`. A verification summary runs at the end (`✓ node … ✓ tekton CLI ✓ context ✓ cloudflared`).
+
 | Platform | Command |
 |---|---|
 | **Windows** (PowerShell 7+) | `iex "& { $(irm https://raw.githubusercontent.com/messyjs/tekton-agent/main/install.ps1) } -Profile recommended"` |

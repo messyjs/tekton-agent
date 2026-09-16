@@ -4,13 +4,13 @@
 #                      [--model NAME] [--provider URL] [--ov-server URL] [--user NAME]
 set -euo pipefail
 
-PROFILE="recommended"; OS_APP=0; MOBILE=0; OV_SERVER=""; MODEL=""; PROVIDER_URL=""; TEKTON_USER=""; SKIP_RUNTIME=0; ENGINES=""; ALL_ENGINES=0
+PROFILE="recommended"; OS_APP=0; MOBILE=0; OV_SERVER=""; MODEL=""; PROVIDER_URL=""; TEKTON_USER=""; SKIP_RUNTIME=0; ENGINES=""; ALL_ENGINES=0; ASSUME_YES=0; OPT_INSTALL=0
 while [[ $# -gt 0 ]]; do case "$1" in
   --minimal) PROFILE="minimal";; --recommended) PROFILE="recommended";; --full) PROFILE="full";;
   --os-app) OS_APP=1;; --mobile-chat) MOBILE=1;; --ov-server) OV_SERVER="$2"; shift;;
   --model) MODEL="$2"; shift;; --provider) PROVIDER_URL="$2"; shift;;
   --user) TEKTON_USER="$2"; shift;; --skip-runtime) SKIP_RUNTIME=1;;
-  --engines) ENGINES="$2"; shift;; --all-engines) ALL_ENGINES=1;;
+  --engines) ENGINES="$2"; shift;; --all-engines) ALL_ENGINES=1;; --yes) ASSUME_YES=1;;
   -h|--help) sed -n '2,5p' "$0"; exit 0;; *) echo "unknown flag: $1"; exit 1;; esac; shift; done
 
 BOLD="\033[1m"; CYAN="\033[36m"; GOLD="\033[33m"; DIM="\033[2m"; RST="\033[0m"
@@ -23,6 +23,38 @@ PROVIDER_URL="${PROVIDER_URL:-http://localhost:11434}"
 
 cat "$REPO_DIR/assets/splash.txt" 2>/dev/null || true
 
+# ── 1a. preflight — detect everything, prompt for optionals ────────
+CORE_MISS=(); OPT_MISS=()
+command -v node >/dev/null 2>&1 && [[ $(node -v | cut -c2- | cut -d. -f1) -ge 20 ]] || CORE_MISS+=("node20+")
+command -v git  >/dev/null 2>&1 || CORE_MISS+=("git")
+command -v npm  >/dev/null 2>&1 || CORE_MISS+=("npm")
+[[ $OS_APP -eq 1 ]] && ! command -v cargo >/dev/null 2>&1 && OPT_MISS+=("rust/cargo  (builds the Agent OS App)")
+[[ $MOBILE -eq 1 ]] && ! command -v cloudflared >/dev/null 2>&1 && OPT_MISS+=("cloudflared (remote mobile chat tunnel)")
+echo -e "${BOLD}▸ preflight${RST}"
+for m in "${CORE_MISS[@]:-}"; do  [[ -n "$m" ]] && echo -e "  ${GOLD}● missing (required)  $m  → auto-install${RST}"; done
+for m in "${OPT_MISS[@]:-}"; do   [[ -n "$m" ]] && echo -e "  ${DIM}○ missing (optional)  $m${RST}"; done
+if [[ ${#OPT_MISS[@]:-0} -gt 0 ]]; then
+  if [[ $ASSUME_YES -eq 1 ]]; then OPT_INSTALL=1; echo -e "${DIM}  --yes: installing optional packages automatically${RST}"
+  elif [[ -t 0 ]]; then
+    read -r -p "  Install the missing optional packages now? [Y/n] " ans
+    [[ ! "$ans" =~ ^[Nn] ]] && OPT_INSTALL=1 || OPT_INSTALL=0
+  else
+    echo -e "${DIM}  (non-interactive: skipping optional installs — re-run with --yes to auto-install)${RST}"
+  fi
+fi
+install_pkg() {  # best-effort package install for a named tool
+  if command -v brew >/dev/null 2>&1; then brew install "$1"
+  elif command -v apt-get >/dev/null 2>&1; then sudo apt-get install -y "$2" || apt-get install -y "$2"
+  elif command -v dnf >/dev/null 2>&1; then sudo dnf install -y "$2"
+  else return 1; fi
+}
+install_cloudflared() {
+  if command -v brew >/dev/null 2>&1; then brew install cloudflared
+  else
+    curl -fsSL -o /tmp/cloudflared https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64       && (sudo mv /tmp/cloudflared /usr/local/bin/cloudflared 2>/dev/null || { mkdir -p "$HOME/.local/bin"; mv /tmp/cloudflared "$HOME/.local/bin/cloudflared"; echo "add $HOME/.local/bin to PATH"; chmod +x "$HOME/.local/bin/cloudflared" 2>/dev/null; })
+  fi
+}
+
 # ── 1. dependencies ──────────────────────────────────────────────────
 need_node=1; command -v node >/dev/null 2>&1 && [[ $(node -v | cut -c2- | cut -d. -f1) -ge 20 ]] && need_node=0
 if [[ $need_node -eq 1 ]]; then
@@ -33,7 +65,9 @@ if [[ $need_node -eq 1 ]]; then
   elif command -v dnf >/dev/null 2>&1; then sudo dnf install -y nodejs git
   else echo "Install Node.js 20+ manually: https://nodejs.org"; exit 1; fi
 fi
-command -v git >/dev/null 2>&1 || { echo "git required"; exit 1; }
+if ! command -v git >/dev/null 2>&1; then
+  echo -e "${CYAN}▸ installing git${RST}"; install_pkg git || { echo "git required — install manually"; exit 1; }
+fi
 command -v npm >/dev/null 2>&1 || { echo "npm required"; exit 1; }
 
 # ── 2. runtime + CLI ────────────────────────────────────────────────
@@ -106,7 +140,10 @@ if [[ $MOBILE -eq 1 ]]; then
   echo "    2) expose:   cloudflared tunnel --url http://localhost:8080"
   echo "    3) phone:    open the tunnel URL in any browser, or point the"
   echo "                 Agent OS App at it. Chat with Tekton from anywhere."
-  command -v cloudflared >/dev/null 2>&1 || echo -e "${DIM}    (install cloudflared: brew install cloudflared | apt install cloudflared)${RST}"
+  if ! command -v cloudflared >/dev/null 2>&1; then
+    if [[ $OPT_INSTALL -eq 1 ]]; then echo -e "${CYAN}  installing cloudflared${RST}"; install_cloudflared || echo -e "${DIM}  auto-install failed — see docs/AGENT-OS.md${RST}"
+    else echo -e "${DIM}    (install cloudflared: brew install cloudflared | apt install cloudflared | re-run with --yes)${RST}"; fi
+  fi
 fi
 if [[ $OS_APP -eq 1 ]]; then
   echo -e "${CYAN}▸ Agent OS App (Tauri 2: Windows/macOS/Android)${RST}"
@@ -114,10 +151,26 @@ if [[ $OS_APP -eq 1 ]]; then
     ( cd "$REPO_DIR/app" && npm install && npx tauri build ) \
       && echo -e "${GOLD}  built → app/src-tauri/target/release/bundle/${RST}" \
       || echo -e "${DIM}  build failed — see docs/AGENT-OS.md (Android needs Android SDK)${RST}"
+  elif [[ $OPT_INSTALL -eq 1 ]]; then
+    echo -e "${CYAN}  installing rustup (user-level)${RST}"
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+    . "$HOME/.cargo/env" 2>/dev/null
+    ( cd "$REPO_DIR/app" && npm install && npx tauri build ) || echo -e "${DIM}  build failed — see docs/AGENT-OS.md${RST}"
   else
-    echo "  Rust not found. Install rustup first: https://rustup.rs then re-run --os-app"
+    echo "  Rust not found. Re-run with --yes to auto-install rustup, or: https://rustup.rs"
   fi
 fi
+
+# ── 6b. verify ──────────────────────────────────────────────────────
+echo -e "${BOLD}▸ verifying install${RST}"
+ok() { echo -e "  ${GOLD}✓ $1${RST}"; }; bad() { echo -e "  ${GOLD}✗ $1${RST}"; }
+command -v node  >/dev/null 2>&1 && ok "node $(node -v)"          || bad "node missing"
+command -v git   >/dev/null 2>&1 && ok "git"                       || bad "git missing"
+command -v tekton >/dev/null 2>&1 && ok "tekton CLI"               || bad "tekton CLI not linked"
+[[ -f "$TEKTON_HOME/tekton.md" ]] && ok "context: $TEKTON_HOME/tekton.md" || bad "tekton.md missing"
+command -v cavemem >/dev/null 2>&1 && ok "cavemem"                 || true
+[[ $OS_APP -eq 1 && ! -d "$REPO_DIR/app/src-tauri/target" ]] && bad "Agent OS app not built (see above)" || true
+[[ $MOBILE -eq 1 ]] && command -v cloudflared >/dev/null 2>&1 && ok "cloudflared" || true
 
 # ── 7. done ─────────────────────────────────────────────────────────
 echo; echo -e "${GOLD}⚔ Tekton Agent installed ($PROFILE profile)${RST}"

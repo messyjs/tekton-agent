@@ -16,7 +16,25 @@ $TektonSrc  = "$env:USERPROFILE\.tekton-src\tekton"
 
 Get-Content "$Repo\assets\splash.txt" -ErrorAction SilentlyContinue
 
-# ── 1. Node.js 20+ ──────────────────────────────────────────────────
+# ── 0. preflight — detect everything, prompt for optionals ────────
+$CoreMiss = @(); $OptMiss = @()
+try { $v = (node -v); if ([int]($v.Substring(1).Split(".")[0]) -lt 20) { $CoreMiss += "node20+" } } catch { $CoreMiss += "node20+" }
+if (-not (Get-Command git -ErrorAction SilentlyContinue))  { $CoreMiss += "git" }
+if ($OsApp -and -not (Get-Command cargo -ErrorAction SilentlyContinue))     { $OptMiss += "rust/cargo   (builds the Agent OS App)" }
+if ($MobileChat -and -not (Get-Command cloudflared -ErrorAction SilentlyContinue)) { $OptMiss += "cloudflared  (remote mobile chat tunnel)" }
+Write-Host "▸ preflight" -ForegroundColor Cyan
+foreach ($m in $CoreMiss) { Write-Host "  ● missing (required)  $m  → auto-install" -ForegroundColor Yellow }
+foreach ($m in $OptMiss)  { Write-Host "  ○ missing (optional)  $m" -ForegroundColor DarkGray }
+$OptInstall = $false
+if ($OptMiss.Count -gt 0) {
+  if ($Yes) { $OptInstall = $true; Write-Host "  -Yes: installing optional packages automatically" -ForegroundColor DarkGray }
+  elseif ([Environment]::UserInteractive) {
+    $ans = Read-Host "  Install the missing optional packages now? [Y/n]"
+    if ($ans -notmatch "^[Nn]") { $OptInstall = $true }
+  } else { Write-Host "  (non-interactive: skipping optional installs — re-run with -Yes)" -ForegroundColor DarkGray }
+}
+
+# ── 1. Node.js 20+ ──────────────────────────────────────────────────────────────────────────────────────────────────
 $needNode = $true
 try { $v = (node -v); if ([int]($v.Substring(1).Split(".")[0]) -ge 20) { $needNode = $false } } catch {}
 if ($needNode) {
@@ -25,6 +43,11 @@ if ($needNode) {
   elseif (Get-Command choco -ErrorAction SilentlyContinue) { choco install nodejs-lts -y }
   else { throw "Install Node.js 20+ from https://nodejs.org then re-run." }
   $env:Path = [Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [Environment]::GetEnvironmentVariable("Path","User")
+}
+
+if ($CoreMiss -contains "git") {
+  Write-Host "▸ installing git (winget)" -ForegroundColor Cyan
+  if (Get-Command winget -ErrorAction SilentlyContinue) { winget install -e --id Git.Git --accept-source-agreements --accept-package-agreements }
 }
 
 # ── 2. runtime + CLI ────────────────────────────────────────────────
@@ -112,7 +135,8 @@ if ($MobileChat) {
   Write-Host "    3) phone:    open the tunnel URL in any browser, or point the"
   Write-Host "                 Agent OS App at it. Chat with Tekton from anywhere."
   if (-not (Get-Command cloudflared -ErrorAction SilentlyContinue)) {
-    Write-Host "    (install cloudflared: winget install Cloudflare.cloudflared)" -ForegroundColor DarkGray
+    if ($OptInstall) { Write-Host "  installing cloudflared (winget)" -ForegroundColor Cyan; winget install -e --id Cloudflare.cloudflared --accept-source-agreements --accept-package-agreements }
+    else { Write-Host "    (install cloudflared: winget install Cloudflare.cloudflared | re-run with -Yes)" -ForegroundColor DarkGray }
   }
 }
 if ($OsApp) {
@@ -122,8 +146,22 @@ if ($OsApp) {
     try { npm install; npx tauri build; Write-Host "  built → app\src-tauri\target\release\bundle\" -ForegroundColor Yellow }
     catch { Write-Host "  build failed — see docs\AGENT-OS.md" -ForegroundColor DarkGray }
     Pop-Location
-  } else { Write-Host "  Rust not found. Install rustup: https://rustup.rs then re-run -OsApp" -ForegroundColor DarkGray }
+  } elseif ($OptInstall) {
+    Write-Host "  installing rustup (winget)" -ForegroundColor Cyan
+    winget install -e --id Rustlang.Rustup --accept-source-agreements --accept-package-agreements
+    $env:Path = [Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [Environment]::GetEnvironmentVariable("Path","User")
+    Push-Location "$Repopp"
+    try { npm install; npx tauri build; Write-Host "  built → app\src-tauri	argeteleaseundle\" -ForegroundColor Yellow } catch { Write-Host "  build failed — see docs\AGENT-OS.md" -ForegroundColor DarkGray }
+    Pop-Location
+  } else { Write-Host "  Rust not found. Re-run with -Yes to auto-install, or: https://rustup.rs" -ForegroundColor DarkGray }
 }
+
+# ── 6b. verify ──────────────────────────────────────────────────────
+Write-Host "▸ verifying install" -ForegroundColor Cyan
+try { Write-Host "  ✓ node $((node -v))" -ForegroundColor Yellow } catch { Write-Host "  ✗ node missing" -ForegroundColor Red }
+if (Get-Command tekton -ErrorAction SilentlyContinue) { Write-Host "  ✓ tekton CLI" -ForegroundColor Yellow } else { Write-Host "  ✗ tekton CLI not linked" -ForegroundColor Red }
+if (Test-Path "$TektonHome	ekton.md") { Write-Host "  ✓ context: $TektonHome	ekton.md" -ForegroundColor Yellow } else { Write-Host "  ✗ tekton.md missing" -ForegroundColor Red }
+if (Get-Command cloudflared -ErrorAction SilentlyContinue) { Write-Host "  ✓ cloudflared" -ForegroundColor Yellow }
 
 # ── 7. done ─────────────────────────────────────────────────────────
 Write-Host ""
