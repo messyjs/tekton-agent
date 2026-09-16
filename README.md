@@ -96,7 +96,7 @@ tekton-agent/
 │   ├── config.example.yaml      # models, fusion, gateway
 │   ├── models.example.json      # pi-format provider catalog
 │   └── settings.example.json
-├── skills/                      # 32 curated skills (profiles select subset)
+├── skills/                      # 33 curated skills incl. house-style (the design DNA)
 ├── extensions/openviking/       # OpenViking recall extension
 ├── app/                         # ⚔ Agent OS App (Tauri 2: Win/mac/Android)
 ├── assets/splash.txt            # the knight & the stone

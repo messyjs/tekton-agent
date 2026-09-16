@@ -73,6 +73,7 @@ $chosen = @()
 if ($Profile -in "recommended","full") { $chosen += $kits.caveman + $kits.session + $kits.routing + $kits.project }
 if ($Profile -eq "full")               { $chosen += $kits.trading + $kits.power + $kits.media }
 Write-Host "▸ installing skills ($Profile)" -ForegroundColor Cyan
+Copy-Item "$Repo\skills\house-style" "$TektonHome\skills\" -Recurse -Force
 foreach ($s in $chosen) {
   if (Test-Path "$Repo\skills\$s") { Copy-Item "$Repo\skills\$s" "$TektonHome\skills\" -Recurse -Force }
 }

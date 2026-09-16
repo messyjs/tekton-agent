@@ -71,6 +71,7 @@ SK_POWER="orchestration skillception computer-use skeleton-key dreams hunger-gam
 SK_MEDIA="pause play product-enhance 1up"
 install_skills() { for s in "$@"; do [[ -d "$REPO_DIR/skills/$s" ]] && cp -r "$REPO_DIR/skills/$s" "$TEKTON_HOME/skills/"; done; }
 echo -e "${CYAN}▸ installing skills ($PROFILE)${RST}"
+install_skills house-style
 if [[ "$PROFILE" == "recommended" || "$PROFILE" == "full" ]]; then
   install_skills $SK_CAVEMAN $SK_SESSION $SK_ROUTING $SK_PROJECT
   command -v cavemem >/dev/null 2>&1 || npm install -g cavemem || echo -e "${DIM}  cavemem not on npm — install from source later${RST}"
