@@ -16,6 +16,13 @@ echo -e "${CYAN}\u25b8 removing skills from $TEKTON_HOME/skills${RST}"
 for s in $SKILLS; do rm -rf "$TEKTON_HOME/skills/$s" 2>/dev/null; done
 [[ -d "$TEKTON_HOME/extensions/openviking" ]] && { rm -rf "$TEKTON_HOME/extensions/openviking"; echo -e "  removed openviking extension"; }
 [[ -f "$TEKTON_HOME/engines.yaml" ]] && rm -f "$TEKTON_HOME/engines.yaml"
+OLD_CMD=$(grep -A1 "^cli:" "$TEKTON_HOME/config.yaml" 2>/dev/null | grep "command:" | sed "s/.*command: *//" | tr -d " ")
+if [[ -n "$OLD_CMD" && "$OLD_CMD" != "tekton" ]]; then
+  rm -f "$HOME/.local/bin/$OLD_CMD" 2>/dev/null
+  for rc in "$HOME/.bashrc" "$HOME/.zshrc"; do [[ -f "$rc" ]] && sed -i.bak "/alias $OLD_CMD=/d" "$rc" 2>/dev/null; done
+  echo -e "  removed launch command shim: $OLD_CMD"
+fi
+[[ -d "$TEKTON_HOME/subagents" ]] && rm -rf "$TEKTON_HOME/subagents"
 [[ -d "$TEKTON_HOME/subagents" ]] && rm -rf "$TEKTON_HOME/subagents"
 
 echo -e "${CYAN}\u25b8 removing npm components${RST}"

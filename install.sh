@@ -4,13 +4,13 @@
 #                      [--model NAME] [--provider URL] [--ov-server URL] [--user NAME]
 set -euo pipefail
 
-PROFILE="recommended"; OS_APP=0; MOBILE=0; OV_SERVER=""; MODEL=""; PROVIDER_URL=""; TEKTON_USER=""; SKIP_RUNTIME=0; ENGINES=""; ALL_ENGINES=0; ASSUME_YES=0; OPT_INSTALL=0; TOOLCHAINS=""; PROJECTS_DIR=""; PROJ_ROOT=""
+PROFILE="recommended"; OS_APP=0; MOBILE=0; OV_SERVER=""; MODEL=""; PROVIDER_URL=""; TEKTON_USER=""; SKIP_RUNTIME=0; ENGINES=""; ALL_ENGINES=0; ASSUME_YES=0; OPT_INSTALL=0; TOOLCHAINS=""; PROJECTS_DIR=""; PROJ_ROOT=""; CMD_NAME=""; RUN_CMD="tekton"
 while [[ $# -gt 0 ]]; do case "$1" in
   --minimal) PROFILE="minimal";; --recommended) PROFILE="recommended";; --full) PROFILE="full";;
   --os-app) OS_APP=1;; --mobile-chat) MOBILE=1;; --ov-server) OV_SERVER="$2"; shift;;
   --model) MODEL="$2"; shift;; --provider) PROVIDER_URL="$2"; shift;;
   --user) TEKTON_USER="$2"; shift;; --skip-runtime) SKIP_RUNTIME=1;;
-  --engines) ENGINES="$2"; shift;; --all-engines) ALL_ENGINES=1;; --yes) ASSUME_YES=1;; --toolchains) TOOLCHAINS="$2"; shift;; --projects-dir) PROJECTS_DIR="$2"; shift;;
+  --engines) ENGINES="$2"; shift;; --all-engines) ALL_ENGINES=1;; --yes) ASSUME_YES=1;; --toolchains) TOOLCHAINS="$2"; shift;; --projects-dir) PROJECTS_DIR="$2"; shift;; --command) CMD_NAME="$2"; shift;;
   -h|--help) sed -n '2,5p' "$0"; exit 0;; *) echo "unknown flag: $1"; exit 1;; esac; shift; done
 
 BOLD="\033[1m"; CYAN="\033[36m"; GOLD="\033[33m"; DIM="\033[2m"; RST="\033[0m"
@@ -98,6 +98,22 @@ fi
 mkdir -p "$PROJ_ROOT"
 echo -e "${CYAN}▸ project files: $PROJ_ROOT${RST}"
 
+# ── 2c. launch command name (default: tekton) ──────────────────────
+if [[ -n "$CMD_NAME" ]]; then RUN_CMD="$CMD_NAME"
+elif [[ -t 0 ]]; then
+  read -r -p "Launch command name? [tekton] " ans
+  RUN_CMD="${ans:-tekton}"
+fi
+if [[ "$RUN_CMD" != "tekton" ]]; then
+  mkdir -p "$HOME/.local/bin"
+  printf '#!/usr/bin/env bash
+exec tekton "$@"
+' > "$HOME/.local/bin/$RUN_CMD" 2>/dev/null && chmod +x "$HOME/.local/bin/$RUN_CMD"     && echo -e "${CYAN}▸ launch command: $RUN_CMD (shim in ~/.local/bin + shell aliases)${RST}"
+  for rc in "$HOME/.bashrc" "$HOME/.zshrc"; do
+    [[ -f "$rc" ]] && ! grep -q "alias $RUN_CMD=" "$rc" 2>/dev/null && echo "alias $RUN_CMD='tekton'" >> "$rc"
+  done
+fi
+
 # ── 3. ~/.tekton home ───────────────────────────────────────────────
 echo -e "${CYAN}▸ wiring $TEKTON_HOME (context home, tekton.md)${RST}"
 mkdir -p "$TEKTON_HOME"/{skills,extensions,sessions,checkpoints}
@@ -117,6 +133,10 @@ sound:
   enabled: true
   file: %s/sounds/beep-boop.wav
 " "$TEKTON_HOME" >> "$TEKTON_HOME/config.yaml"
+grep -q "^cli:" "$TEKTON_HOME/config.yaml" 2>/dev/null || printf "
+cli:
+  command: %s
+" "$RUN_CMD" >> "$TEKTON_HOME/config.yaml"
 [[ -f "$TEKTON_HOME/settings.json" ]] || cp "$REPO_DIR/config/settings.example.json" "$TEKTON_HOME/settings.json"
 # reuse existing pi auth if present
 [[ -f "$HOME/.pi/agent/auth.json" && ! -f "$TEKTON_HOME/auth.json" ]] && cp "$HOME/.pi/agent/auth.json" "$TEKTON_HOME/auth.json" || true

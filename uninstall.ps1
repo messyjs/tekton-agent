@@ -13,6 +13,14 @@ foreach ($s in $skills) { if (Test-Path "$TektonHome\skills\$s") { Remove-Item "
 if (Test-Path "$TektonHome\extensions\openviking") { Remove-Item "$TektonHome\extensions\openviking" -Recurse -Force; Write-Host "  removed openviking extension" }
 if (Test-Path "$TektonHome\engines.yaml") { Remove-Item "$TektonHome\engines.yaml" -Force }
 if (Test-Path "$TektonHome\subagents") { Remove-Item "$TektonHome\subagents" -Recurse -Force }
+if (Test-Path "$TektonHome\config.yaml") {
+  $oldCmd = (Select-String -Path "$TektonHome\config.yaml" -Pattern "command:\s*(\S+)" -Context 1,0 | Select-Object -First 1)
+  if ($oldCmd -and $oldCmd.Matches[0].Groups[1].Value -ne "tekton" -and (Get-Command tekton -ErrorAction SilentlyContinue)) {
+    $npmDir = Split-Path (Get-Command tekton).Source
+    Remove-Item "$npmDir\$($oldCmd.Matches[0].Groups[1].Value).cmd" -Force -ErrorAction SilentlyContinue
+    Write-Host "  removed launch command shim"
+  }
+}
 
 Write-Host "▸ removing npm components" -ForegroundColor Cyan
 if (Get-Command cavemem -ErrorAction SilentlyContinue) { npm uninstall -g cavemem 2>$null; Write-Host "  removed cavemem" }

@@ -41,6 +41,8 @@ and remembers everything via **Caveman** memory and **OpenViking** long-term rec
 
 ## Install
 
+**You choose the launch command** — asked during install (default `tekton`), override with `--command` / `-CommandName` (alias + shim created; uninstaller cleans it up).
+
 **Rust is recommended** (builds the Agent OS App); per-target toolchains for VST plugins, games, web, Windows/macOS/iOS/Android/Linux builds: see [`docs/TOOLCHAINS.md`](docs/TOOLCHAINS.md) and the `--toolchains` installer flag.
 
 **Missing prerequisites are handled automatically.** The installer runs a preflight:
