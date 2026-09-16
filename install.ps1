@@ -65,12 +65,13 @@ $kits = @{
   session  = "checkpoint","compress","startup","health"
   routing  = "sorting-hat","update-models","add-account"
   project  = "project-registry","project-status","treasure-map","dictionary","find-skills"
+  engines  = "engine-forge"
   trading  = "hermes-trading","markov-hedge-fund-method","tv-fast-ops","orca-cli"
   power    = "orchestration","skillception","computer-use","skeleton-key","dreams","hunger-games","quantum-consciousness"
   media    = "pause","play","product-enhance","1up"
 }
 $chosen = @()
-if ($Profile -in "recommended","full") { $chosen += $kits.caveman + $kits.session + $kits.routing + $kits.project }
+if ($Profile -in "recommended","full") { $chosen += $kits.caveman + $kits.session + $kits.routing + $kits.project + $kits.engines }
 if ($Profile -eq "full")               { $chosen += $kits.trading + $kits.power + $kits.media }
 Write-Host "▸ installing skills ($Profile)" -ForegroundColor Cyan
 Copy-Item "$Repo\skills\house-style" "$TektonHome\skills\" -Recurse -Force

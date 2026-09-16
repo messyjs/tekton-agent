@@ -4,6 +4,14 @@
 # Start with the listed start command, or register in ~/.tekton/config.yaml.
 
 engines:
+  engine-forge-bridge:
+    package: "bountyfull-harness"
+    start: "cd /d/AI Drive/projects/BountyFull && node electron/main.mjs   # harness :8720 + quant sidecar :8721"
+    transport: http
+    port: 8720
+    profile: optional
+    description: "BountyFull harness bridge — build/test persona engines (TowelieAI-compatible) with solver toolbelt (SymPy, SciPy, OR-Tools, Z3, ML, sandboxed exec). 1GB cap per engine pack."
+    subagent_role: "Forge-worker sub-agents POST engine briefs and run self-test gates against the solver toolbelt; coordinator installs to ~/.openmausbot/engines + ~/.bountyfull/enginepacks."
   forge:
     package: "@tekton/forge"
     start: "npm run build -w @tekton/forge && node -e 'import(\"@tekton/forge\")'"

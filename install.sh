@@ -65,6 +65,7 @@ mkdir -p "$TEKTON_HOME"/{skills,extensions,sessions,checkpoints}
 SK_SESSION="checkpoint compress startup health"
 SK_ROUTING="sorting-hat update-models add-account"
 SK_PROJECT="project-registry project-status treasure-map dictionary find-skills"
+SK_ENGINES="engine-forge"
 SK_CAVEMAN="caveman caveman-commit caveman-compress caveman-help caveman-review"
 SK_TRADING="hermes-trading markov-hedge-fund-method tv-fast-ops orca-cli"
 SK_POWER="orchestration skillception computer-use skeleton-key dreams hunger-games quantum-consciousness"
@@ -73,7 +74,7 @@ install_skills() { for s in "$@"; do [[ -d "$REPO_DIR/skills/$s" ]] && cp -r "$R
 echo -e "${CYAN}▸ installing skills ($PROFILE)${RST}"
 install_skills house-style
 if [[ "$PROFILE" == "recommended" || "$PROFILE" == "full" ]]; then
-  install_skills $SK_CAVEMAN $SK_SESSION $SK_ROUTING $SK_PROJECT
+  install_skills $SK_CAVEMAN $SK_SESSION $SK_ROUTING $SK_PROJECT $SK_ENGINES
   command -v cavemem >/dev/null 2>&1 || npm install -g cavemem || echo -e "${DIM}  cavemem not on npm — install from source later${RST}"
 fi
 if [[ "$PROFILE" == "full" ]]; then install_skills $SK_TRADING $SK_POWER $SK_MEDIA; fi

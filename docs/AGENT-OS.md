@@ -74,6 +74,7 @@ sub-agent** attach through the gateway adapters or direct MCP.
 | **browser-use** | `@tekton/browser-use-service` | HTTP | browser automation for web-worker sub-agents |
 | **ml-ops** | `@tekton/ml-ops` | HTTP | training/eval loop — measures self-improvement |
 | **gann** | `@tekton/gann` | library | Gann trading engine |
+| **engine-forge-bridge** | BountyFull harness | HTTP :8720 | persona-engine builder (TowelieAI-compatible) — corpus harvest → distill → synthesize → self-test; **1GB cap per engine pack** |
 
 Install: `./install.sh --engines "forge,voice"` or `--all-engines`.
 Registry lands at `~/.tekton/engines.yaml` — every engine declares a **`subagent_role`**:
