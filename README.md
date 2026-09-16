@@ -7,8 +7,8 @@
                  ╔╩╗                      ║   coding agent               ║
     ▄▄██▄▄      ▐█ █▌                     ╠══════════════════════════════╣
    ▟██████▙    ▐█ █▌                      ║  Pi   · minimal core         ║
-   █ ◉  ◉ █   ▐█ █▌                      ║  Hermes · orchestration      ║
-   ▜██████▛    ╲█╱                       ║  OpenMythos · deep routing   ║
+    █ ◉  ◉ █   ▐█ █▌                      ║  Hermes · orchestration      ║
+    ▜██████▛    ╲█╱                       ║  OpenMythos · deep routing   ║
     ▐█▄█▌     ▄▄█▄▄▄▄▄                   ╚══════════════════════════════╝
     ▐████▌   ▄████████▄
     ▐████▌  ▄██████████▄
