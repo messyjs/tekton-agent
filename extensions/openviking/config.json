@@ -1,0 +1,28 @@
+{
+  "enabled": true,
+  "syncTurns": true,
+  "recallTokenBudget": 2000,
+  "recallMaxContentChars": 500,
+  "recallPreferAbstract": true,
+  "scoreThreshold": 0.35,
+  "minQueryLength": 3,
+  "profileTokenBudget": 10000,
+  "resumeContextBudget": 128000,
+  "commitTokenThreshold": 500000,
+  "commitKeepRecentCount": 10,
+  "takeover": {
+    "enabled": true,
+    "tokenThreshold": 1000000,
+    "keepRecentTurns": 3,
+    "overviewBudget": 3000,
+    "overviewPollMs": 2000,
+    "overviewPollMax": 15
+  },
+  "captureToolResults": false,
+  "captureMode": "semantic",
+  "captureMaxLength": 100000,
+  "captureToolMaxChars": 1000000,
+  "captureAssistantTurns": true,
+  "bypassPatterns": [],
+  "logLevel": "error"
+}

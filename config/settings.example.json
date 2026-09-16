@@ -1,0 +1,5 @@
+{
+  "defaultProvider": "ollama",
+  "defaultModel": "glm-5.1:cloud",
+  "defaultThinking": "off"
+}

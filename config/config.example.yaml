@@ -1,0 +1,34 @@
+# Tekton configuration — template installed to ~/.tekton/config.yaml
+# Replace {{...}} placeholders or re-run the installer with --model / --provider.
+
+identity:
+  name: tekton
+
+models:
+  fast:
+    model: glm-5.1:cloud          # {{MODEL_FAST}}
+    provider: ollama               # {{PROVIDER}}
+    baseUrl: http://localhost:11434  # {{PROVIDER_URL}}
+  deep:
+    model: glm-5.1:cloud          # {{MODEL_DEEP}}
+    provider: ollama
+    baseUrl: http://localhost:11434
+
+gateway:
+  port: 8080                       # tekton --gateway serves chat + API here
+  cors: ["*"]
+
+# Fusion (multi-model ensemble) — keep disabled until you know your token burn.
+fusion:
+  enabled: false
+  mode: director
+  minModels: 1
+  timeoutMs: 180000
+  useJudge: false
+  qualityThreshold: 0.75
+
+# OpenViking long-term recall (optional; installer --ov-server writes this)
+openviking:
+  enabled: false
+  # server: http://localhost:1933
+  # api_key: {{OV_API_KEY}}

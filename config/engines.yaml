@@ -1,0 +1,67 @@
+# ⚔ Tekton Engine Registry
+# Engines are capability servers (HTTP + MCP) that the main Tekton agent and
+# ORCA sub-agents attach to. Install with:  install.sh --engines "forge,voice"
+# Start with the listed start command, or register in ~/.tekton/config.yaml.
+
+engines:
+  forge:
+    package: "@tekton/forge"
+    start: "npm run build -w @tekton/forge && node -e 'import(\"@tekton/forge\")'"
+    transport: mcp
+    port: 8100
+    profile: recommended
+    description: "The Forge — builds and refines skills, personas, SOUL templates. This is the self-improvement engine."
+    subagent_role: "Any sub-agent can request forge work (new skill, persona patch, SOUL edit) through MCP; forge returns installable artifacts."
+
+  pi-agent-service:
+    package: "@tekton/pi-agent-service"
+    start: "node --run build -w @tekton/pi-agent-service; npx tekton-pi-agent start"
+    transport: http+mcp
+    port: 8085
+    profile: optional
+    description: "Trading intelligence sidecar — Gann, Fibonacci, TradingView control via HTTP + MCP."
+    subagent_role: "Trading sub-agents (hermes-trading, markov-hedge-fund-method) drive this engine for analysis and TradingView ops."
+
+  voice:
+    package: "@tekton/voice"
+    start: "npm run build -w @tekton/voice && npm start -w @tekton/voice"
+    transport: http
+    port: 8090
+    profile: optional
+    description: "Voice engine — speak and be spoken to."
+    subagent_role: "Sub-agents request spoken output / audio input through the gateway voice adapter."
+
+  docling:
+    package: "@tekton/docling-service"
+    start: "npm run build -w @tekton/docling-service && npm start -w @tekton/docling-service"
+    transport: http
+    port: 8095
+    profile: optional
+    description: "Document ingestion — PDF/audio/video → structured text for the memory systems."
+    subagent_role: "Research sub-agents push documents here before summarizing into OpenViking."
+
+  browser-use:
+    package: "@tekton/browser-use-service"
+    start: "npm run build -w @tekton/browser-use-service && npm start -w @tekton/browser-use-service"
+    transport: http
+    port: 8097
+    profile: optional
+    description: "Browser automation engine (pairs with the computer-use skill)."
+    subagent_role: "Web-worker sub-agents drive browsing sessions; results stream back to the coordinator."
+
+  ml-ops:
+    package: "@tekton/ml-ops"
+    start: "npm run build -w @tekton/ml-ops"
+    transport: http
+    port: 8099
+    profile: optional
+    description: "Training/eval loop — measures whether Tekton is actually improving."
+    subagent_role: "Evaluator sub-agents run benchmarks and write scorecards to ~/.tekton/memory."
+
+  gann:
+    package: "@tekton/gann"
+    start: "npm run build -w @tekton/gann"
+    transport: library
+    profile: optional
+    description: "Gann trading engine (screener + app variants: gann-app)."
+    subagent_role: "Strategy sub-agents import gann directly; no server needed."

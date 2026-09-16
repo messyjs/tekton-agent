@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Markov Hedge Fund</string>
+    <string name="subtitle">Regime Detection • Roan Framework</string>
+    <string name="ticker_hint">Enter ticker (e.g. SPY, BTC-USD, AAPL)</string>
+    <string name="analyze_button">Detect Regime</string>
+    <string name="years_label">Years:</string>
+    <string name="window_label">Window:</string>
+    <string name="threshold_label">Threshold:</string>
+    <string name="default_years">10</string>
+    <string name="default_window">20</string>
+    <string name="default_threshold">5%</string>
+    <string name="loading_message">Fetching data and computing regime…</string>
+    <string name="error_prefix">Error:</string>
+    <string name="framework_credit">Framework: Roan (@RohOnChain)</string>
+    <string name="disclaimer">Backtests are historical, not forward-looking.</string>
+    <string name="transition_matrix_header">TRANSITION MATRIX</string>
+    <string name="persistence_header">PERSISTENCE</string>
+    <string name="stationary_header">LONG-RUN MIX</string>
+    <string name="signal_header">SIGNAL</string>
+    <string name="backtest_header">WALK-FORWARD</string>
+    <string name="current_regime_header">CURRENT REGIME</string>
+    <string name="next_probs_header">NEXT-DAY PROBABILITIES</string>
+</resources>

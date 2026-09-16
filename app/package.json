@@ -1,0 +1,15 @@
+{
+  "name": "tekton-agent-os",
+  "private": true,
+  "version": "0.1.0",
+  "description": "⚔ Tekton Agent OS — sessions, projects, software, models. Windows/macOS/Android.",
+  "scripts": {
+    "dev": "tauri dev",
+    "build": "tauri build",
+    "tauri": "tauri",
+    "android:init": "tauri android init",
+    "android:dev": "tauri android dev",
+    "android:build": "tauri android build"
+  },
+  "devDependencies": { "@tauri-apps/cli": "^2" }
+}

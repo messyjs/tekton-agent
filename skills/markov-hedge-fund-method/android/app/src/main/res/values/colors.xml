@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark background palette (matches Pine Script storyboard) -->
+    <color name="bg_primary">#0D1117</color>
+    <color name="bg_secondary">#161B22</color>
+    <color name="bg_card">#1C2128</color>
+    <color name="bg_card_elevated">#21262D</color>
+    <color name="border_subtle">#30363D</color>
+
+    <!-- Regime colours — muted, never neon (matches Pine hsl values) -->
+    <color name="bull">#84BBA1</color>       <!-- hsl(150,38%,64%) soft green -->
+    <color name="bear">#C57F86</color>       <!-- hsl(354,48%,64%) muted rose -->
+    <color name="sideways">#A4ABB7</color>    <!-- hsl(220,14%,68%) cool grey -->
+
+    <!-- Accent -->
+    <color name="accent">#3FDE7E</color>     <!-- bright signal green -->
+    <color name="accent_dim">#6BF0A6</color>  <!-- bright green number -->
+
+    <!-- Text -->
+    <color name="text_primary">#E6EDF3</color>
+    <color name="text_secondary">#8B949E</color>
+    <color name="text_dim">#6E7681</color>
+
+    <!-- Diagonal cell backdrop -->
+    <color name="diag_bg">#264D3A</color>     <!-- green-tinted -->
+    <color name="off_diag_bg">#1C2128</color>
+</resources>
